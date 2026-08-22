@@ -137,6 +137,32 @@ async def export_tally(data: ExtractionResult):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Tally XML generation failed: {str(e)}")
 
+# Mount compiled React static frontend if dist directory exists
+import sys
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+
+BASE_DIR = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+DIST_DIR = os.path.abspath(os.path.join(BASE_DIR, "..", "frontend", "dist"))
+if not os.path.exists(DIST_DIR):
+    DIST_DIR = os.path.abspath(os.path.join(BASE_DIR, "frontend_dist"))
+
+if os.path.exists(DIST_DIR):
+    assets_dir = os.path.join(DIST_DIR, "assets")
+    if os.path.exists(assets_dir):
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+        
+    @app.get("/")
+    def serve_index():
+        return FileResponse(os.path.join(DIST_DIR, "index.html"))
+
 if __name__ == "__main__":
     import uvicorn
+    import webbrowser
+    import threading
+
+    def open_browser():
+        webbrowser.open("http://localhost:8000")
+
+    threading.Timer(1.2, open_browser).start()
     uvicorn.run(app, host="0.0.0.0", port=8000)

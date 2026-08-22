@@ -6,6 +6,10 @@ import GapAlertBanner from './components/GapAlertBanner';
 import ReviewDashboard from './components/ReviewDashboard';
 import CapitalGainsCard from './components/CapitalGainsCard';
 
+const API_BASE = (typeof window !== 'undefined' && window.location.origin.includes(':3001')) 
+  ? 'http://localhost:8000' 
+  : '';
+
 export default function App() {
   const [result, setResult] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -18,7 +22,7 @@ export default function App() {
     formData.append('file', file);
 
     try {
-      const response = await fetch('http://localhost:8000/api/process', {
+      const response = await fetch(`${API_BASE}/api/process`, {
         method: 'POST',
         body: formData,
       });
@@ -45,7 +49,7 @@ export default function App() {
   const handleRevalidate = async (updatedTransactions) => {
     if (!result) return;
     try {
-      const response = await fetch('http://localhost:8000/api/revalidate', {
+      const response = await fetch(`${API_BASE}/api/revalidate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -73,7 +77,7 @@ export default function App() {
   const handleExportExcel = async () => {
     if (!result) return;
     try {
-      const response = await fetch('http://localhost:8000/api/export/excel', {
+      const response = await fetch(`${API_BASE}/api/export/excel`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(result),
@@ -95,7 +99,7 @@ export default function App() {
   const handleExportTally = async () => {
     if (!result) return;
     try {
-      const response = await fetch('http://localhost:8000/api/export/tally', {
+      const response = await fetch(`${API_BASE}/api/export/tally`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(result),
