@@ -1,0 +1,8 @@
+{
+  "bank_name": "State Bank of India",
+  "bank_code": "SBI",
+  "keywords": ["STATE BANK OF INDIA", "SBI", "SBIN0", "Txn Date", "Value Date", "Description", "Ref No", "Debit", "Credit", "Balance"],
+  "date_formats": ["%d-%b-%Y", "%d/%m/%Y", "%d-%m-%Y", "%d %b %Y"],
+  "columns": ["date", "description", "reference", "debit", "credit", "balance"],
+  "header_pattern": "(?:Date|Txn Date).*?(?:Description|Details).*?(?:Debit|Dr).*?(?:Credit|Cr).*?(?:Balance)"
+}

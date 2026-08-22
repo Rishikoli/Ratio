@@ -1,0 +1,8 @@
+{
+  "bank_name": "HDFC Bank",
+  "bank_code": "HDFC",
+  "keywords": ["HDFC BANK", "HDFC", "HDFC0", "Narration", "Chq/Ref No", "Value Dt", "Withdrawal Amt", "Deposit Amt", "Closing Balance"],
+  "date_formats": ["%d/%m/%y", "%d/%m/%Y", "%d-%m-%Y"],
+  "columns": ["date", "description", "reference", "debit", "credit", "balance"],
+  "header_pattern": "(?:Date|Value Dt).*?(?:Narration).*?(?:Withdrawal|Debit).*?(?:Deposit|Credit).*?(?:Balance)"
+}

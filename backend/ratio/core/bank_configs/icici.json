@@ -1,0 +1,7 @@
+{
+  "bank_name": "ICICI Bank",
+  "bank_code": "ICICI",
+  "keywords": ["ICICI BANK", "ICIC0", "Transaction Remarks", "Withdrawal Amount", "Deposit Amount", "Balance"],
+  "date_formats": ["%d-%m-%Y", "%d/%m/%Y"],
+  "columns": ["date", "description", "reference", "debit", "credit", "balance"]
+}
