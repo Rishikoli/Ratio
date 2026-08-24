@@ -23,7 +23,7 @@ def main():
     # 2. Run PyInstaller
     print("\n[Step 2/2] Running PyInstaller executable bundle generation...")
     try:
-        subprocess.run(["pyinstaller", "--noconfirm", "ratio.spec"], cwd=root_dir, check=True)
+        subprocess.run([sys.executable, "-m", "PyInstaller", "--noconfirm", "ratio.spec"], cwd=root_dir, check=True)
         print("✔ Standalone Ratio Windows executable built successfully in 'dist/Ratio/'.")
         print("\nDistribution package ready!")
         print("  Executable: dist/Ratio/Ratio.exe")

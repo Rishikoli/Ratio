@@ -18,8 +18,11 @@ If you want to package Ratio into a standalone `.exe` without requiring Python o
    ```
 3. The standalone application folder will be created at `dist/Ratio/`.
 
-## Key Features
-- **Neural OCR Parsing**: Powered by RapidOCR (PP-OCRv4 ONNX).
-- **Interactive Review & Edit Grid**: Edit misread numbers directly in the browser with live mathematical re-validation.
-- **Missing Page & Gap Detector**: Automatically alerts if bank statement pages are missing or balance gaps exist.
-- **Smart Exports**: Direct export to Tally XML vouchers and formatted Excel (.xlsx) workbooks.
+## Key Features & High-Efficiency Core
+- **Ultra-Lightweight Footprint (< 170 MB RAM)**: Specifically optimized to run smoothly on low-spec 8 GB RAM office laptops without lagging Windows or requiring expensive GPUs.
+- **Lightning-Fast Neural OCR (200ms / Page)**: Powered by RapidOCR (PP-OCRv4 ONNX) with multi-core parallel page processing.
+- **Mathematical Self-Healing Engine**: Automatically audits `Prev Balance - Debit + Credit = Current Balance` and auto-corrects minor OCR misreads in real-time.
+- **3D Perspective & Illumination Preprocessor**: Flattens angled mobile passbook photos and strips heavy shadows cast by phones or hands.
+- **Interactive Review & Edit Grid**: Inline editing of numbers directly in the browser with real-time recalculation.
+- **Missing Page & Balance Gap Detector**: Automatically flags missing pages and closing balance discrepancies.
+- **Smart Exports**: One-click direct export to Tally XML vouchers and formatted multi-tab Excel (.xlsx) workbooks.

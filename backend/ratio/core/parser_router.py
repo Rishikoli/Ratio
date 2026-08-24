@@ -3,7 +3,10 @@ import json
 import re
 import uuid
 from typing import List, Dict, Any, Tuple, Optional
-from datetime import datetime
+try:
+    from rapidfuzz import fuzz
+except ImportError:
+    fuzz = None
 
 from ratio.models.schemas import Transaction, StatementMetadata, DocumentType, RowValidationStatus
 from ratio.core.ocr_engine import TextLine
@@ -64,7 +67,14 @@ class ParserRouter:
             if code == "GENERIC":
                 continue
             keywords = cfg.get("keywords", [])
-            score = sum(1 for kw in keywords if kw.upper() in header_text)
+            score = 0
+            for kw in keywords:
+                kw_up = kw.upper()
+                if kw_up in header_text:
+                    score += 1
+                elif fuzz is not None and len(kw_up) > 4:
+                    if fuzz.partial_ratio(kw_up, header_text) >= 88:
+                        score += 1
             if score > highest_score:
                 highest_score = score
                 best_match = code
@@ -129,7 +139,41 @@ class ParserRouter:
                         transactions.append(trx)
             line_idx += 1
 
+        self._self_heal_transactions(transactions)
+
         return metadata, transactions
+
+    def _self_heal_transactions(self, transactions: List[Transaction]):
+        """
+        Mathematical Self-Healing:
+        Validates Previous Balance - Debit + Credit = Current Balance.
+        If a balance is incorrect, but can be fixed to match math constraints,
+        auto-correct it and lower confidence to flag it.
+        """
+        if not transactions:
+            return
+
+        for i in range(1, len(transactions)):
+            prev_trx = transactions[i-1]
+            curr_trx = transactions[i]
+
+            if prev_trx.balance is not None:
+                expected_balance = prev_trx.balance
+                if curr_trx.debit is not None:
+                    expected_balance -= curr_trx.debit
+                if curr_trx.credit is not None:
+                    expected_balance += curr_trx.credit
+                
+                expected_balance = round(expected_balance, 2)
+                curr_balance_rounded = round(curr_trx.balance, 2) if curr_trx.balance is not None else None
+
+                if curr_balance_rounded != expected_balance:
+                    # Self-heal the balance
+                    curr_trx.balance = expected_balance
+                    # Lower confidence to indicate it was auto-corrected
+                    curr_trx.confidence = max(0.1, curr_trx.confidence - 0.4)
+                    if not curr_trx.description.endswith("[Auto-Healed]"):
+                        curr_trx.description += " [Auto-Healed]"
 
     def _normalize_date(self, raw_date: str) -> Optional[str]:
         raw_date = raw_date.strip().replace('.', '/').replace('-', '/')
@@ -145,6 +189,28 @@ class ParserRouter:
                 pass
         return None
 
+    @staticmethod
+    def _clean_amount_string(raw: str) -> Optional[float]:
+        if not raw:
+            return None
+        # Remove currency symbols and surrounding noise
+        cleaned = re.sub(r'[₹RsINR\$€]', '', raw, flags=re.IGNORECASE).strip()
+        if not cleaned:
+            return None
+            
+        # European format: 1.000,50 -> 1000.50
+        if re.match(r'^\d{1,3}(\.\d{3})+,\d{2}$', cleaned):
+            cleaned = cleaned.replace('.', '').replace(',', '.')
+        # Indian / Standard format: 1,00,000.50 or 100,000.50
+        else:
+            cleaned = cleaned.replace(',', '')
+            
+        try:
+            val = float(cleaned)
+            return val
+        except ValueError:
+            return None
+
     def _parse_transaction_row(self, lines: List[TextLine], start_idx: int, date_str: str) -> Optional[Transaction]:
         line = lines[start_idx]
         text = line.text
@@ -153,12 +219,15 @@ class ParserRouter:
         if self._is_metadata_or_noise(text):
             return None
 
+        # Clean currency symbols
+        clean_text = re.sub(r'[₹\$€]|Rs\.?\b|INR\b', '', text, flags=re.IGNORECASE)
+
         # Extract all numbers/amounts from the line
-        amounts = re.findall(r'[\d,]+\.\d{2}', text)
+        amounts = re.findall(r'[\d,]+\.\d{2}|\b\d{1,3}(?:\.\d{3})+,\d{2}\b', clean_text)
         
         if not amounts:
             # Try whole numbers if decimal absent
-            raw_nums = re.findall(r'\b\d{3,7}\b', text)
+            raw_nums = re.findall(r'\b\d{3,7}\b', clean_text)
             # Filter out numbers that match typical calendar years (2020-2029) or page numbers
             amounts = [n for n in raw_nums if not (2020 <= int(n) <= 2030)]
             
@@ -167,14 +236,12 @@ class ParserRouter:
             
         float_amounts = []
         for amt in amounts:
-            try:
-                clean_amt = float(amt.replace(',', ''))
+            parsed_val = self._clean_amount_string(amt)
+            if parsed_val is not None:
                 # Filter out exact calendar year values if parsed as float
-                if 2020.0 <= clean_amt <= 2030.0 and "." not in amt:
+                if 2020.0 <= parsed_val <= 2030.0 and "." not in amt:
                     continue
-                float_amounts.append(clean_amt)
-            except ValueError:
-                pass
+                float_amounts.append(parsed_val)
                 
         if not float_amounts:
             return None

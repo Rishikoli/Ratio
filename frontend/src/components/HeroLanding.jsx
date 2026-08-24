@@ -8,7 +8,7 @@ export default function HeroLanding({ onFileUpload, isProcessing }) {
       <div className="hero-content">
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginBottom: '16px' }}>
           <span className="love-badge">
-            <Heart size={14} fill="#e11d48" /> Ratio (made with love for my love)
+            <Heart size={14} fill="#e11d48" /> Ratio Engine
           </span>
           <span className="badge-offline">
             <ShieldCheck size={14} /> 100% Offline Desktop Engine
@@ -77,7 +77,7 @@ export default function HeroLanding({ onFileUpload, isProcessing }) {
 
           <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid var(--border-subtle)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: '12px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <CheckCircle2 size={14} color="#059669" /> Auto Math Validation
+              <CheckCircle2 size={14} color="#059669" /> Mathematical Self-Healing
             </span>
             <span style={{ fontSize: '12px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <FileSpreadsheet size={14} color="#4f46e5" /> Tally Ready XML

@@ -5,6 +5,7 @@ import io
 import json
 import os
 import re
+import concurrent.futures
 
 from ratio.models.schemas import ExtractionResult, StatementMetadata, Transaction, ValidationSummary, RevalidateRequest
 from ratio.core.document_loader import DocumentLoader
@@ -39,10 +40,7 @@ async def process_document(file: UploadFile = File(...)):
         contents = await file.read()
         pages = DocumentLoader.load_document(contents, file.filename)
         
-        all_lines = []
-        for page in pages:
-            lines = OCREngine.extract_lines(page)
-            all_lines.extend(lines)
+        all_lines = OCREngine.extract_lines_batch(pages)
             
         metadata, transactions = parser_router.parse_document(file.filename, pages, all_lines)
         

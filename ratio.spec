@@ -32,11 +32,15 @@ hiddenimports = [
     'pydantic'
 ]
 
-# Collect extra data and binaries from rapidocr_onnxruntime
-tmp_datas, tmp_binaries, tmp_hidden = collect_all('rapidocr_onnxruntime')
-datas.extend(tmp_datas)
-binaries.extend(tmp_binaries)
-hiddenimports.extend(tmp_hidden)
+# Collect extra data and binaries from rapidocr_onnxruntime, rapid_layout, rapidfuzz
+for pkg in ['rapidocr_onnxruntime', 'rapid_layout', 'rapidfuzz']:
+    try:
+        tmp_datas, tmp_binaries, tmp_hidden = collect_all(pkg)
+        datas.extend(tmp_datas)
+        binaries.extend(tmp_binaries)
+        hiddenimports.extend(tmp_hidden)
+    except Exception as ex:
+        print(f"PyInstaller collect_all warning for {pkg}:", ex)
 
 a = Analysis(
     ['backend/app.py'],
@@ -47,7 +51,7 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=[],
+    excludes=['matplotlib', 'tkinter', 'PyQt5', 'PyQt6', 'PySide2', 'PySide6', 'scipy', 'notebook', 'IPython'],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
     cipher=block_cipher,
@@ -64,7 +68,7 @@ exe = EXE(
     name='Ratio',
     debug=False,
     bootloader_ignore_signals=False,
-    strip=False,
+    strip=True,
     upx=True,
     console=True,
     disable_windowed_traceback=False,
@@ -79,7 +83,7 @@ coll = COLLECT(
     a.binaries,
     a.zipfiles,
     a.datas,
-    strip=False,
+    strip=True,
     upx=True,
     upx_exclude=[],
     name='Ratio',
